@@ -1,6 +1,4 @@
 
-declare global {
-  interface Window{
-    ethereum?: ethers.providers.ExternalProvider
-	}
+interface Window{
+	ethereum?: ethers.providers.ExternalProvider
 }

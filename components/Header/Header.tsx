@@ -14,6 +14,10 @@ import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 
+import { checkIfUserIsConnected, connectWallet, getUserAddress, getUserBalance} from './../../services/wallet';
+import { Button, MenuList } from '@mui/material'
+import MenuButton from "@mui/material/Button"
+
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 const Search = styled('div')(({ theme }) => ({
@@ -59,18 +63,33 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export const Header = () => {
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+	const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+	const [isUserConnected, setIsUserConnected] = React.useState("");
+	const [userAddress, setUserAddress] = React.useState("");
+	const [userBalance, setUserBalance] = React.useState("");
 
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
+	React.useEffect(() => {
+		handleWallet();
+	}, []);
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+	const handleWallet = async () => {
+		setIsUserConnected(await checkIfUserIsConnected());
+		setUserAddress(await getUserAddress());
+
+		const balance = await getUserBalance();
+		setUserBalance(String(Math.round(Number(balance) * 10000) / 10000));
+	}
+
+	const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+		setAnchorElUser(event.currentTarget);
+	};
+
+	const handleCloseUserMenu = () => {
+		setAnchorElUser(null);
+	};
 
 	const drawerWidth = 240;
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  	const [mobileOpen, setMobileOpen] = React.useState(false);
 	const handleDrawerToggle = () => {
 		setMobileOpen(!mobileOpen);
 	};
@@ -105,35 +124,46 @@ export const Header = () => {
 				</Search>
 
 				<Box sx={{ flexGrow: 1 }} />
-				<Box sx={{ display: 'flex' }}>
-					<Tooltip title="Open settings">
-						<IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-							<Avatar alt="Remy Sharp" src="" />
-						</IconButton>
-					</Tooltip>
-					<Menu
-						sx={{ mt: '45px' }}
-						id="menu-appbar"
-						anchorEl={anchorElUser}
-						anchorOrigin={{
-							vertical: 'top',
-							horizontal: 'right',
-						}}
-						keepMounted
-						transformOrigin={{
-							vertical: 'top',
-							horizontal: 'right',
-						}}
-						open={Boolean(anchorElUser)}
-						onClose={handleCloseUserMenu}
-					>
-						{settings.map((setting) => (
-							<MenuItem key={setting} onClick={handleCloseUserMenu}>
-								<Typography textAlign="center">{setting}</Typography>
-							</MenuItem>
-						))}
-					</Menu>
-				</Box>
+
+				{isUserConnected == 'true' || 
+					<Button 
+						variant="outlined" 
+						sx={{ margin: '0 5px 0 0', color: '#dedede', borderColor: '#757575' }} 
+						onClick={connectWallet}>
+							Connect your wallet
+					</Button>}
+
+				{isUserConnected == 'false' || 
+					<Box sx={{ display: 'flex' }} >
+						<Button 
+							variant="outlined" 
+							sx={{ margin: '0 5px 0 0', color: '#dedede', borderColor: '#757575', textTransform: 'none' }} 
+							onClick={handleOpenUserMenu}>
+								{userAddress} | Balance: {userBalance}
+						</Button>
+						<Menu
+							sx={{ mt: '45px' }}
+							id="menu-appbar"
+							anchorEl={anchorElUser}
+							anchorOrigin={{
+								vertical: 'top',
+								horizontal: 'right',
+							}}
+							keepMounted
+							transformOrigin={{
+								vertical: 'top',
+								horizontal: 'right',
+							}}
+							open={Boolean(anchorElUser)}
+							onClose={handleCloseUserMenu}
+						>
+							{settings.map((setting) => (
+								<MenuItem key={setting} onClick={handleCloseUserMenu}>
+									<Typography textAlign="center">{setting}</Typography>
+								</MenuItem>
+							))}
+						</Menu>
+					</Box>}
 			</Toolbar>
 		</AppBar>
   );
