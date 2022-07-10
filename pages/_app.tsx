@@ -19,10 +19,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 				<CssBaseline />
 				<Header />
 				<Sidebar />
-				<Box
-					component="main"
-					sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
-				>
+				<Box sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}>
 					<Toolbar />
 					<Component {...pageProps} />
 				</Box>

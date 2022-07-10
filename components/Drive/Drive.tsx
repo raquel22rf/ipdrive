@@ -2,6 +2,7 @@ import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePag
 import Draggable from 'react-draggable';
 import Link from 'next/link'
 import React from 'react';
+import { File } from '../../services/tableland';
 
 import FolderIcon from '@mui/icons-material/Folder';
 import DescriptionOutlineIcon from '@mui/icons-material/DescriptionOutlined';
@@ -59,11 +60,33 @@ export function createData(
   return { type, name, code, size, cid };
 }
 
-export const Drive = (props: {data: Data[]}) => {
+export const Drive = (props: {files: File[]}) => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [menuEv, setMenuEv] = React.useState<any|null>(null);
   const [selectedIndex, setSelectedIndex] = React.useState(1);
+	let data: Data[] = [];
+
+	props.files?.forEach((file: File, index: number) => {
+		if (file.path !== '/') {
+			// filter
+			data.push(createData(
+				"folder",
+				file.path.split('/')[1], // change for parent folder instead of root
+				'Jun 30, 2022 me',
+				'-',
+				'-',
+			));
+		} else {
+			data.push(createData(
+				"file",
+				file.name,
+				file.modifiedDate + ' ' + file.owner,
+				file.size,
+				file.cid,
+			));
+		}
+	});
 
   const handleListItemClick = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -118,12 +141,12 @@ export const Drive = (props: {data: Data[]}) => {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{props.data
+							{data
 								?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 								.map((row) => {
 									return (
 										<>
-											<TableRow hover role="checkbox" tabIndex={-1} key={row.code} onContextMenu={handleOpenOptions}>
+											<TableRow hover role="checkbox" tabIndex={-1} key={row.name} onContextMenu={handleOpenOptions}>
 												{columns.map((column) => {
 													const value = row[column.id];
 													return (
@@ -160,7 +183,7 @@ export const Drive = (props: {data: Data[]}) => {
 				<TablePagination
 					rowsPerPageOptions={[10, 25, 100]}
 					component="div"
-					count={props.data?.length}
+					count={data? data.length: 0}
 					rowsPerPage={rowsPerPage}
 					page={page}
 					onPageChange={handleChangePage}

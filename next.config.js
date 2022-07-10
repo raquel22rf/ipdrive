@@ -10,6 +10,9 @@ const nextConfig = {
       },
     ];
   },
+	experiments: {
+		topLevelAwait: true,
+	}
 }
 
 module.exports = nextConfig
