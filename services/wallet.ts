@@ -8,7 +8,6 @@ export const connectWallet = async () => {
             const connectAccount = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
-            console.log("Account:", await connectAccount.toString().substr(0, 8));
         }     
     }
 };
@@ -43,7 +42,6 @@ export const getUserBalance = async () => {
     const MATIC_ADDRESS = "0x0000000000000000000000000000000000001010";
     const MATIC = new ethers.Contract(MATIC_ADDRESS, ERC20ABI, provider);
     const balance = await MATIC.balanceOf(account[0]);
-    console.log("dentro", ethers.utils.formatEther(balance))
 
     return ethers.utils.formatEther(balance);
 }

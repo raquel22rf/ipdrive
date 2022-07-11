@@ -15,7 +15,7 @@ import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 
 import { checkIfUserIsConnected, connectWallet, getUserAddress, getUserBalance} from './../../services/wallet';
-import { Button, MenuList } from '@mui/material'
+import { Button, ButtonGroup, MenuList } from '@mui/material'
 import MenuButton from "@mui/material/Button"
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -135,12 +135,19 @@ export const Header = () => {
 
 				{isUserConnected == 'false' || 
 					<Box sx={{ display: 'flex' }} >
-						<Button 
-							variant="outlined" 
-							sx={{ margin: '0 5px 0 0', color: '#dedede', borderColor: '#757575', textTransform: 'none' }} 
-							onClick={handleOpenUserMenu}>
-								{userAddress} | Balance: {userBalance}
-						</Button>
+						<ButtonGroup variant="outlined" aria-label="outlined button group">
+							<Button
+								disabled
+								sx={{":disabled": { color: '#dedede', borderColor: '#757575', textTransform: 'none' }}}>
+								{userBalance} MATIC
+							</Button>
+							<Button 
+								variant="outlined" 
+								sx={{ color: '#dedede', borderColor: '#757575', textTransform: 'none' }} 
+								onClick={handleOpenUserMenu}>
+								{userAddress.substring(0, 7) + ' ... ' + userAddress.substring(userAddress.length - 7, userAddress.length)}
+							</Button>
+						</ButtonGroup>
 						<Menu
 							sx={{ mt: '45px' }}
 							id="menu-appbar"

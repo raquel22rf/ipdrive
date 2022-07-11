@@ -50,7 +50,7 @@ export const dbGetFiles = async () => {
 	// ipdrive_shares_80001_48
 	const tableland = await dbConnect();
 	const readRes = await tableland.read(`SELECT * FROM ipdrive_files_80001_49;`);
-	console.log(readRes);
+
 	let files: File[] = [];
 	for (const row of readRes.rows) {
 		files.push({
@@ -67,6 +67,18 @@ export const dbGetFiles = async () => {
 	}
 	
 	return files;
+}
+
+export const dbGetSharedFiles = async () => {
+
+}
+
+export const dbGetRecentFiles = async () => {
+
+}
+
+export const dbGetDeletedFiles = async () => {
+
 }
 
 export const dbAddFile = async () => {
