@@ -81,6 +81,13 @@ export const dbGetDeletedFiles = async () => {
 
 }
 
+export const dbGetSizeSum = async () => {
+	const tableland = await dbConnect();
+	const readRes = await tableland.read(`SELECT sum(size) FROM ipdrive_files_80001_49;`);
+
+	return readRes.rows[0][0];
+}
+
 export const dbAddFile = async () => {
 	const tableland = await dbConnect();
 	const date = new Date().toISOString();

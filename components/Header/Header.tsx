@@ -6,8 +6,6 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import Avatar from '@mui/material/Avatar';
-import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 
 import { styled, alpha } from '@mui/material/styles';
@@ -15,10 +13,9 @@ import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 
 import { checkIfUserIsConnected, connectWallet, getUserAddress, getUserBalance} from './../../services/wallet';
-import { Button, ButtonGroup, MenuList } from '@mui/material'
-import MenuButton from "@mui/material/Button"
+import { Button, ButtonGroup } from '@mui/material'
 
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const settings = ['Settings', 'Logout'];
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -139,7 +136,8 @@ export const Header = () => {
 							<Button
 								disabled
 								sx={{":disabled": { color: '#dedede', borderColor: '#757575', textTransform: 'none' }}}>
-								{userBalance} MATIC
+								{userBalance} MATIC &nbsp;
+								<img src="/images/polygon-logo.svg" width="25" height="25" />
 							</Button>
 							<Button 
 								variant="outlined" 

@@ -9,6 +9,7 @@ import DescriptionOutlineIcon from '@mui/icons-material/DescriptionOutlined';
 
 import { MenuComponent } from './Menu';
 import { getUserAddress } from '../../services/wallet';
+import { convertToComputingUnits } from '../../utils/functions';
 
 
 interface Column {
@@ -27,6 +28,7 @@ interface Data {
   modified_date: string;
   size: number | string;
 	cid: string;
+	files: string[];
 }
 
 export function createData(
@@ -35,8 +37,9 @@ export function createData(
   modified_date: string,
   size: number | string,
 	cid: string,
+	files: string[],
 ): Data {
-  return { type, name, modified_date, size, cid };
+  return { type, name, modified_date, size, cid, files };
 }
 
 export const Drive = (props: {files: File[]}) => {
@@ -55,7 +58,7 @@ export const Drive = (props: {files: File[]}) => {
 					return '-';
 				}
 				
-				if (value.split(' ')[1].toLowerCase() === address) {
+				if (value.split(' ')[1]?.toLowerCase() === address) {
 					return `${date} me`;
 				} else {
 					let addr = value.split(' ')[1];
@@ -64,18 +67,7 @@ export const Drive = (props: {files: File[]}) => {
 			}
 		},
 		{ id: 'size', label: 'File Size', minWidth: 170, align: 'center',
-			format: (value: string) => {
-				if (value === '-')
-					return '-'
-
-				// convert bytes to KB, MB, GB, etc
-				const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-				if (value === '0')
-					return '0 Bytes';
-				
-				const i = parseInt(value, 10) === 0 ? 0 : Math.floor(Math.log(parseInt(value, 10)) / Math.log(1024));
-				return `${parseFloat((parseInt(value, 10) / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
-			}
+			format: (value: string) => convertToComputingUnits(value)
 		},
 		{ id: 'cid', label: 'CID', minWidth: 100, align: 'center',
 			format: (value: string) => value === '-' ? '-': value.substring(0, 7) + ' ... ' + value.substring(value.length - 7, value.length)
@@ -88,15 +80,33 @@ export const Drive = (props: {files: File[]}) => {
 	});
 
 	props.files?.forEach((file: File, index: number) => {
-		if (file.path !== '/') {
-			// filter
+		if (file.name.charAt(file.name.length - 1) === '/') {
 			data.push(createData(
-				"folder",
-				file.path.split('/')[1], // change for parent folder instead of root
-				'Jun 30, 2022 me',
+				'folder',
+				file.name.substring(0, file.name.length - 1),
+				file.modifiedDate + ' ' + file.owner,
 				'-',
 				'-',
+				[]
 			));
+		} else if (file.path !== '/') {
+			// filter
+			if (data.filter(d => d.name === file.path.split('/')[1]).length === 0) {
+				data.push(createData(
+					"folder",
+					file.path.split('/')[1], // change for parent folder instead of root (come as an url param)
+					file.modifiedDate + ' ' + file.owner,
+					'-',
+					'-',
+					[file.cid],
+				));
+			}	else {
+				let folder = data.filter(d => d.name === file.path.split('/')[1])[0]
+				folder.files.push(file.cid);
+				if (folder.modified_date < file.modifiedDate) {
+					folder.modified_date = file.modifiedDate + ' ' + file.owner;
+				}
+			}
 		} else {
 			data.push(createData(
 				"file",
@@ -104,8 +114,19 @@ export const Drive = (props: {files: File[]}) => {
 				file.modifiedDate + ' ' + file.owner,
 				file.size,
 				file.cid,
+				[]
 			));
 		}
+	});
+
+	data.sort((a, b) => {
+		if (a.type === 'folder' && b.type === 'file') {
+			return -1;
+		}
+		if (a.type === 'file' && b.type === 'folder') {
+			return 1;
+		}
+		return a.name.localeCompare(b.name);
 	});
 
   const handleListItemClick = (

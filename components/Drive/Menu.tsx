@@ -1,4 +1,4 @@
-import { DeleteOutline, DriveFileRenameOutline, FileDownloadOutlined, InfoOutlined, ShareOutlined } from '@mui/icons-material';
+import { DeleteOutline, DriveFileMoveOutlined, DriveFileRenameOutline, FileDownloadOutlined, InfoOutlined, ShareOutlined } from '@mui/icons-material';
 import { ListItemIcon, ListItemText, MenuItem, Menu, Paper } from '@mui/material';
 import React from 'react';
 
@@ -37,6 +37,12 @@ export const MenuComponent = (props : {menuEv:any, setMenuEv:any}) => {
 					<DriveFileRenameOutline fontSize="small" />
 				</ListItemIcon>
 				<ListItemText>Rename</ListItemText>
+			</MenuItem>
+			<MenuItem>
+				<ListItemIcon>
+					<DriveFileMoveOutlined fontSize="small" />
+				</ListItemIcon>
+				<ListItemText>Move</ListItemText>
 			</MenuItem>
 			<MenuItem>
 				<ListItemIcon>

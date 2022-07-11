@@ -1,58 +1,41 @@
 import { Alert, Box, Button, Modal, TextField, Typography } from '@mui/material'
 import type { NextPage } from 'next'
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { Drive as DriveComponent, createData } from '../../components/Drive/Drive';
-import { connectWallet } from '../../services/wallet';
-import { dbAddFile, dbConnect, dbCreateFilesTable, dbGetFiles, dbUpdateFile, File } from '../../services/tableland';
+import { Drive as DriveComponent } from '../../components/Drive/Drive';
+import { dbAddFile, dbConnect, dbCreateFilesTable, dbGetFiles, dbGetSizeSum, dbUpdateFile, File } from '../../services/tableland';
+import { getUserAddress } from '../../services/wallet';
 	
 const Drive: NextPage = () => {
 	const [files, setFiles] = React.useState<File[]>([]);
   const [open, setOpen] = React.useState(false);
+	const [address, setAddress] = React.useState('');
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+	const folderEl = useRef<HTMLInputElement>(null);
 
 	const handleCreateFolder = () => {
+		if(folderEl.current && folderEl.current.value) {
+			setFiles([...files, {
+				cid: '-',
+				name: folderEl.current.value + '/',
+				path: '/' + folderEl.current.value + '/',
+				creationDate: new Date().toISOString(),
+				modifiedDate: new Date().toISOString(),
+				owner: address,
+				size: 0,
+				shared: false,
+				status: 'pending',
+			}]);
+		}
 		setOpen(false);
 	}
 
-	/*const data = [
-		createData('folder', 'Folder 1', 'Jun 30, 2022 me', '-', '-'),
-		createData('folder', 'Folder 2', 'Jun 30, 2022 me', '-', '-'),
-		createData('folder', 'Folder 3', 'Jun 30, 2022 me', '-', '-'),
-		createData('folder', 'Folder 4', 'Jun 30, 2022 me', '-', '-'),
-		createData('folder', 'Folder 5', 'Jun 30, 2022 me', '-', '-'),
-		createData('file', 'File 1.txt', 'Jun 30, 2022 me', 25475400, 'bafkreiabltrd5zm73pvi7plq25pef3hm7jxhbi3kv4hapegrkfpkqtkbme'),
-		createData('file', 'File 2.txt', 'Jun 30, 2022 me', 83019200, 'bafkreidrsgkip425zjamc3pvmil7dpatss7ncedyaatepxyionxi7py5fq'),
-		createData('file', 'File 3.txt', 'Jun 30, 2022 me', 4857000, 'bafkreiaqv66m5nd6mwgkk7h5lwqnjzj54s4f7knmnrjhb7ylzqfg2vdo54'),
-	];*/
-
 	useEffect(() => {
-		/*
-		connectWallet().then((wallet) => {
-			console.log('connected to wallet', wallet);
-		});
-		dbConnect().then((db) => {
-			console.log('connected to db', db);
-		});
-		/*dbUpdateFile().then((res) => {
-			console.log('updated file', res);
-		});*/
-		/*dbCreateTables().then((res) => {
-			console.log('created tables', res);
-		});*/
-		/*dbCreateFilesTable().then((res) => {
-			console.log('created files table', res);
-		});
-		dbGetFiles().then((data) => {
-			console.log('read table', files);
-			setFiles(data);
-		});*/
-		/*dbAddFile().then((data) => {
-			console.log('added file', data);
-		});*/
+		getUserAddress().then(addr => setAddress(addr));
+		dbGetFiles().then((data) => setFiles(data));
 	}, []);
 
 	return (
@@ -84,7 +67,7 @@ const Drive: NextPage = () => {
 						New Folder
           </Typography>
 
-					<TextField value="Untitled folder" variant="outlined" sx={{ marginTop:1, width: "100%" }} />
+					<TextField inputRef={folderEl} variant="outlined" sx={{ marginTop:1, width: "100%" }} />
 
 					<Box sx={{ marginTop: 1, display: 'flex', justifyContent: 'flex-end' }}>
 						<Button color="primary" onClick={handleClose} sx={{ marginRight: 1, color: '#757575' }}>
