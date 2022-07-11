@@ -12,7 +12,7 @@ import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 
-import { checkIfUserIsConnected, connectWallet, getUserAddress, getUserBalance} from './../../services/wallet';
+import { checkIfUserIsConnected, connectWallet, getUserAddress, getUserBalance, checkChain} from './../../services/wallet';
 import { Button, ButtonGroup } from '@mui/material'
 
 const settings = ['Settings', 'Logout'];
@@ -70,11 +70,16 @@ export const Header = () => {
 	}, []);
 
 	const handleWallet = async () => {
-		setIsUserConnected(await checkIfUserIsConnected());
-		setUserAddress(await getUserAddress());
+		
+		if (await checkChain()){
+			setIsUserConnected(await checkIfUserIsConnected());
+			setUserAddress(await getUserAddress());
 
-		const balance = await getUserBalance();
-		setUserBalance(String(Math.round(Number(balance) * 10000) / 10000));
+			const balance = await getUserBalance();
+			setUserBalance(String(Math.round(Number(balance) * 10000) / 10000));
+		} else {
+			// add message to change chain
+		}
 	}
 
 	const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -122,7 +127,7 @@ export const Header = () => {
 
 				<Box sx={{ flexGrow: 1 }} />
 
-				{isUserConnected == 'true' || 
+				{isUserConnected == 'false' && 
 					<Button 
 						variant="outlined" 
 						sx={{ margin: '0 5px 0 0', color: '#dedede', borderColor: '#757575' }} 
@@ -130,7 +135,7 @@ export const Header = () => {
 							Connect your wallet
 					</Button>}
 
-				{isUserConnected == 'false' || 
+				{isUserConnected == 'true' && 
 					<Box sx={{ display: 'flex' }} >
 						<ButtonGroup variant="outlined" aria-label="outlined button group">
 							<Button

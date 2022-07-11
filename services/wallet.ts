@@ -45,3 +45,11 @@ export const getUserBalance = async () => {
 
     return ethers.utils.formatEther(balance);
 }
+
+export const checkChain =async () => {
+    var isCorrect = false;
+    let provider = new ethers.providers.Web3Provider(window.ethereum)
+    const { chainId } = await provider.getNetwork()
+    if (chainId == 80001) isCorrect = true;
+    return isCorrect;
+}
