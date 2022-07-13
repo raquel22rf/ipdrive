@@ -14,8 +14,10 @@ import SearchIcon from '@mui/icons-material/Search';
 
 import { checkIfUserIsConnected, connectWallet, getUserAddress, getUserBalance, checkChain} from './../../services/wallet';
 import { Button, ButtonGroup } from '@mui/material'
+import { Router } from '@mui/icons-material';
+import { useRouter } from 'next/router';
 
-const settings = ['Settings', 'Logout'];
+const options = ['Settings'];
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -60,8 +62,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export const Header = () => {
+  const router = useRouter();
 	const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-	const [isUserConnected, setIsUserConnected] = React.useState("");
+	const [isUserConnected, setIsUserConnected] = React.useState(false);
 	const [userAddress, setUserAddress] = React.useState("");
 	const [userBalance, setUserBalance] = React.useState("");
 
@@ -70,7 +73,6 @@ export const Header = () => {
 	}, []);
 
 	const handleWallet = async () => {
-		
 		if (await checkChain()){
 			setIsUserConnected(await checkIfUserIsConnected());
 			setUserAddress(await getUserAddress());
@@ -86,7 +88,14 @@ export const Header = () => {
 		setAnchorElUser(event.currentTarget);
 	};
 
-	const handleCloseUserMenu = () => {
+	const handleCloseUserMenu = (option: string) => {
+		switch (option) {
+			case 'Settings':
+				router.push(`/settings`);
+				break;
+			default:
+				break;
+		}
 		setAnchorElUser(null);
 	};
 
@@ -127,7 +136,7 @@ export const Header = () => {
 
 				<Box sx={{ flexGrow: 1 }} />
 
-				{isUserConnected == 'false' && 
+				{!isUserConnected && 
 					<Button 
 						variant="outlined" 
 						sx={{ margin: '0 5px 0 0', color: '#dedede', borderColor: '#757575' }} 
@@ -135,7 +144,7 @@ export const Header = () => {
 							Connect your wallet
 					</Button>}
 
-				{isUserConnected == 'true' && 
+				{isUserConnected && 
 					<Box sx={{ display: 'flex' }} >
 						<ButtonGroup variant="outlined" aria-label="outlined button group">
 							<Button
@@ -167,9 +176,11 @@ export const Header = () => {
 							open={Boolean(anchorElUser)}
 							onClose={handleCloseUserMenu}
 						>
-							{settings.map((setting) => (
-								<MenuItem key={setting} onClick={handleCloseUserMenu}>
-									<Typography textAlign="center">{setting}</Typography>
+							{options.map((option) => (
+								<MenuItem key={option} onClick={() => handleCloseUserMenu(option)}>
+									<Typography textAlign="center">
+										{option}
+									</Typography>
 								</MenuItem>
 							))}
 						</Menu>

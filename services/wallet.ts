@@ -2,27 +2,26 @@ import { ethers, } from "ethers";
 import ERC20ABI from "./ERC20.json";
 
 export const connectWallet = async () => {
-    if (window.ethereum) {
-        const account = await window.ethereum.request({ method: "eth_accounts" });
-        if (account.length == 0) {
-            const connectAccount = await window.ethereum.request({
-                method: "eth_requestAccounts",
-            });
-        }     
-    }
+	if (window.ethereum) {
+		const account = await window.ethereum.request({ method: "eth_accounts" });
+		if (account.length == 0) {
+			await window.ethereum.request({
+				method: "eth_requestAccounts",
+			});
+		}     
+	}
 };
 
 export const checkIfUserIsConnected = async () => {
-    var result = 'false';
     if (window.ethereum) {
         const account = await window.ethereum.request({ method: "eth_accounts" });
         if (account.length == 0) {
-            result = 'false';
+          return false;
         } else {
-            result = 'true';
+          return true;
         }       
     }
-    return result;
+    return false;
 }
 
 export const getUserAddress = async () => {
