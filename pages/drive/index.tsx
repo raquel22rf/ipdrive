@@ -5,10 +5,12 @@ import React, { useEffect, useRef } from 'react';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Drive as DriveComponent } from '../../components/Drive/Drive';
-import { dbAddFile, dbConnect, dbCreateFilesTable, dbGetFiles, dbGetSizeSum, dbUpdateFile, File } from '../../services/tableland';
+import { dbAddFile, dbGetFiles, dbGetSizeSum, File } from '../../services/tableland';
 import { getUserAddress } from '../../services/wallet';
-	
-const Drive: NextPage = () => {
+import { storeFiles } from '../../services/web3storage';
+import { convertToComputingUnits } from '../../utils/functions';
+
+const Drive: NextPage = (props: any) => {
 	const [files, setFiles] = React.useState<File[]>([]);
   const [open, setOpen] = React.useState(false);
 	const [address, setAddress] = React.useState('');
@@ -33,6 +35,23 @@ const Drive: NextPage = () => {
 		setOpen(false);
 	}
 
+	const handleFileUpload = async (e: any) => {
+		const cid = await storeFiles(e.target.files[0]);
+		await dbAddFile(cid, e.target.files[0].name, '/', address, e.target.files[0].size);
+		setFiles([...files, {
+			cid,
+			name: e.target.files[0].name,
+			path: '/',
+			creationDate: new Date().toISOString(),
+			modifiedDate: new Date().toISOString(),
+			owner: address,
+			size: e.target.files[0].size,
+			shared: false,
+			status: 'pending',
+		}]);
+		dbGetSizeSum().then((data: string) => props.setSize(convertToComputingUnits((Number(data) + e.target.files[0].size).toString())));
+	}
+
 	useEffect(() => {
 		getUserAddress().then(addr => setAddress(addr));
 		dbGetFiles().then((data) => setFiles(data));
@@ -41,7 +60,18 @@ const Drive: NextPage = () => {
 	return (
 		<>
 			<Button variant="outlined" startIcon={ <CreateNewFolderIcon /> } onClick={handleOpen} sx={{ margin: '0 5px 0 0', color: '#dedede', borderColor: '#757575' }}>New Folder</Button>
-			<Button variant="outlined" startIcon={ <UploadFileIcon /> } sx={{ color: '#dedede', borderColor: '#757575' }}>Upload File</Button>
+			<Button
+				variant="outlined"
+				component="label"
+				startIcon={ <UploadFileIcon /> }
+				sx={{ color: '#dedede', borderColor: '#757575' }}>
+				Upload File
+				<input
+					type="file"
+					onChange={handleFileUpload}
+					hidden
+				/>
+			</Button>
 
 			<DriveComponent files={files} />
       <Modal

@@ -21,16 +21,14 @@ import { Button, LinearProgress } from '@mui/material';
 import { convertToComputingUnits, ratioBetweenComputingUnits } from '../../utils/functions';
 import { dbGetSizeSum } from '../../services/tableland';
 
-
-export const Sidebar = () => {
+export const Sidebar = (props: any) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 	const [container, setContainer] = React.useState<any>(undefined);
-	const [size, setSize] = React.useState('0 Bytes');
 	const drawerWidth = 240;
 
 	React.useEffect(() => {
 		setContainer(() => window.document.body);
-		dbGetSizeSum().then((data: string) => setSize(convertToComputingUnits(data)));
+		dbGetSizeSum().then((data: string) => props.setSize(convertToComputingUnits(data)));
 	}, [])
 
   const handleDrawerToggle = () => {
@@ -105,10 +103,10 @@ export const Sidebar = () => {
       </List>
 
 			<Box sx={{ margin: '0 20px', width: '80%', position: 'absolute', bottom: '20px' }}>
-				<Typography variant='caption'>{size} of 20 GB used</Typography>
+				<Typography variant='caption'>{props.size} of 20 GB used</Typography>
 				<LinearProgress
 					variant="determinate"
-					value={ratioBetweenComputingUnits(size, "20 GB")} />
+					value={ratioBetweenComputingUnits(props.size, "20 GB")} />
 				<Button variant="outlined" sx={{ width: '100%', marginTop: 1 }}>
 					Upgrade Now
 				</Button>

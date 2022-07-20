@@ -88,18 +88,18 @@ export const dbGetSizeSum = async () => {
 	return readRes.rows[0][0];
 }
 
-export const dbAddFile = async () => {
+export const dbAddFile = async (cid: string, name: string, path: string, owner: string, size: number) => {
 	const tableland = await dbConnect();
 	const date = new Date().toISOString();
 	const insertRes = await tableland.write(
 		`INSERT INTO ipdrive_files_80001_49 (cid, name, path, creation_date, modified_date, owner, size, shared, status) VALUES (
-			'bafybeiernexwp5rphpk6vltnvmgijphskw5aonvyvkqhyt4rfvvruvmu3m',
-			'5263301.gif',
-			'/test/',
+			'` + cid + `',
+			'` + name + `',
+			'` + path + `',
 			'` + date + `',
 			'` + date + `',
-			'0x5Ed3a87a8f45d9d471e1AeB1BCf73F5C6B037CAf',
-			13327,
+			'` + owner + `',
+			` + size + `,
 			'false',
 			'pending');`
 	);

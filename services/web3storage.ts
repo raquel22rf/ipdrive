@@ -1,29 +1,19 @@
 import { Web3Storage, getFilesFromPath  } from 'web3.storage';
 
 const API_ENDPOINT = new URL("https://api.web3.storage");
+const storage = new Web3Storage({ endpoint: API_ENDPOINT, token : process.env.NEXT_PUBLIC_WEB3_STORAGE_API_KEY ? process.env.NEXT_PUBLIC_WEB3_STORAGE_API_KEY : "" });
 
-const storage = new Web3Storage({ endpoint: API_ENDPOINT, token : process.env.API_TOKEN ? process.env.API_TOKEN : "" })
-
-export const storeFiles = async (input_files_path: any) => {
-  const files = [];
-
-  for (const path of input_files_path) {
-    const pathFiles = await getFilesFromPath(path)
-    files.push(...pathFiles)
-  }
-
-  const cid = await storage.put(files)
-  console.log('Content added with CID:', cid)
-  return cid
+export const storeFiles = async (file: any) => {
+  const cid = await storage.put([file], { name: file.name });
+  console.log('Content added with CID:', cid);
+  return cid;
 }
 
-export const retrieveFiles = async (cid : string) => {
+export const retrieveFile = async (cid : string) => {
+  const res = await storage.get(cid);
+  const files = await res!.files();
 
-  const res = await storage.get(cid)
-  const files = await res!.files()
- 
   for (const file of files) {
-    console.log(`${file.cid}: ${file.name} (${file.size} bytes)`)
+    console.log(`${file.cid}: ${file.name} (${file.size} bytes)`);
   }
-  
 }
