@@ -214,6 +214,7 @@ export const Drive = (props: {files: File[]}) => {
 											<MenuComponent
 												menuEv={menuEv}
 												setMenuEv={setMenuEv}
+												files={data}
 											/>
 										</>
 									);

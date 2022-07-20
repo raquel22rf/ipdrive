@@ -1,4 +1,4 @@
-import { Web3Storage, getFilesFromPath  } from 'web3.storage';
+import { Web3Storage } from 'web3.storage';
 
 const API_ENDPOINT = new URL("https://api.web3.storage");
 const storage = new Web3Storage({ endpoint: API_ENDPOINT, token : process.env.NEXT_PUBLIC_WEB3_STORAGE_API_KEY ? process.env.NEXT_PUBLIC_WEB3_STORAGE_API_KEY : "" });
@@ -13,7 +13,5 @@ export const retrieveFile = async (cid : string) => {
   const res = await storage.get(cid);
   const files = await res!.files();
 
-  for (const file of files) {
-    console.log(`${file.cid}: ${file.name} (${file.size} bytes)`);
-  }
+	return files[0];
 }
