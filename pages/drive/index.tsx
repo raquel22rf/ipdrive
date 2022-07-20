@@ -53,9 +53,11 @@ const Drive: NextPage = (props: any) => {
 	}
 
 	useEffect(() => {
-		getUserAddress().then(addr => setAddress(addr));
-		dbGetFiles().then((data) => setFiles(data));
-	}, []);
+		getUserAddress().then(addr => {
+			setAddress(addr);
+			dbGetFiles(addr).then((data) => setFiles(data));
+		});
+	}, [files.length]);
 
 	return (
 		<>

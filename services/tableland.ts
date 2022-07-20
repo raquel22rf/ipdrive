@@ -45,11 +45,12 @@ export const dbCreateSharesTable = async () => {
 	console.log(`Created files table: ${receipt.name}`);
 }
 
-export const dbGetFiles = async () => {
+export const dbGetFiles = async (owner: string) => {
 	// ipdrive_files_80001_49
 	// ipdrive_shares_80001_48
 	const tableland = await dbConnect();
-	const readRes = await tableland.read(`SELECT * FROM ipdrive_files_80001_49;`);
+	const readRes = await tableland.read(`SELECT * FROM ipdrive_files_80001_49
+		WHERE owner = '` + owner + `';`);
 
 	let files: File[] = [];
 	for (const row of readRes.rows) {
@@ -73,12 +74,52 @@ export const dbGetSharedFiles = async () => {
 
 }
 
-export const dbGetRecentFiles = async () => {
+export const dbGetRecentFiles = async (owner: string) => {
+	const tableland = await dbConnect();
+	const date = new Date();
+	date.setDate(date.getDate() - 5);
+	const readRes = await tableland.read(`SELECT * FROM ipdrive_files_80001_49
+		WHERE owner = '` + owner + `' AND modified_date > '` + date.toISOString() + `';`);
 
+	let files: File[] = [];
+	for (const row of readRes.rows) {
+		files.push({
+			cid: row[0],
+			name: row[1],
+			path: row[2],
+			creationDate: row[3],
+			modifiedDate: row[4],
+			owner: row[5],
+			size: row[6],
+			shared: row[7] === "true",
+			status: row[8],
+		});
+	}
+	
+	return files;
 }
 
-export const dbGetDeletedFiles = async () => {
+export const dbGetDeletedFiles = async (owner: string) => {
+	const tableland = await dbConnect();
+	const readRes = await tableland.read(`SELECT * FROM ipdrive_files_80001_49
+		WHERE owner = '` + owner + `' AND status = 'deleted';`);
 
+	let files: File[] = [];
+	for (const row of readRes.rows) {
+		files.push({
+			cid: row[0],
+			name: row[1],
+			path: row[2],
+			creationDate: row[3],
+			modifiedDate: row[4],
+			owner: row[5],
+			size: row[6],
+			shared: row[7] === "true",
+			status: row[8],
+		});
+	}
+	
+	return files;
 }
 
 export const dbGetSizeSum = async () => {
@@ -114,9 +155,11 @@ export const dbUpdateFile = async () => {
 	return updateRes;
 }
 
-export const dbDeleteFile = async () => {
+export const dbDeleteFile = async (cid: string) => {
 	const tableland = await dbConnect();
-	const removeRes = await tableland.write(`DELETE FROM mytable_80001_39 WHERE id = 0;`);
+	//const removeRes = await tableland.write(`DELETE FROM mytable_80001_39 WHERE id = 0;`);
+	const removeRes = await tableland.write(`UPDATE mytable_80001_39 SET status = 'deleted'
+		WHERE cid = '` + cid + `';`);
 
 	return removeRes;
 }
