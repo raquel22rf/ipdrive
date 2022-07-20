@@ -145,6 +145,7 @@ export const dbAddFile = async (cid: string, name: string, path: string, owner: 
 			'pending');`
 	);
 	
+	console.log(`Added file: ${insertRes.hash}`);
 	return insertRes;
 }
 
