@@ -45,6 +45,12 @@ export const dbCreateSharesTable = async () => {
 	console.log(`Created files table: ${receipt.name}`);
 }
 
+export const dbGrantUpdate = async (address: string) => {
+	const tableland = await dbConnect();
+	const grantRes = await tableland.write(`GRANT UPDATE ON ipdrive_files_80001_49 TO '` + address + `';`);
+	console.log(`Granted update on files table:`, grantRes);
+}
+
 export const dbGetFiles = async (owner: string) => {
 	// ipdrive_files_80001_49
 	// ipdrive_shares_80001_48
@@ -153,6 +159,19 @@ export const dbUpdateFile = async () => {
 	const tableland = await dbConnect();
 	const updateRes = await tableland.write(`UPDATE mytable_80001_39 SET name = 'Bob' WHERE id = 0;`);
 	
+	return updateRes;
+}
+
+export const dbUpdatePath = async (cid: string, path: string) => {
+	const tableland = await dbConnect();
+
+	const readRes = await tableland.read(`SELECT * FROM ipdrive_files_80001_49
+		WHERE cid = '` + cid + `';`);
+	console.log(cid, readRes);
+	const updateRes = await tableland.write(`UPDATE mytable_80001_39 SET path = '` + path + `'
+		WHERE cid = '` + cid + `';`);
+	
+	console.log(`Updated file path: ${updateRes.hash}`);
 	return updateRes;
 }
 
