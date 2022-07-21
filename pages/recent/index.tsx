@@ -6,11 +6,9 @@ import { getUserAddress } from '../../services/wallet';
 
 const Recent: NextPage = () => {
 	const [files, setFiles] = React.useState<File[]>([]);
-	const [address, setAddress] = React.useState('');
 
 	useEffect(() => {
 		getUserAddress().then(addr => {
-			setAddress(addr);
 			dbGetRecentFiles(addr).then((data) => setFiles(data));
 		});
 	}, [files.length]);
