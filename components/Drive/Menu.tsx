@@ -3,19 +3,19 @@ import { ListItemIcon, ListItemText, MenuItem, Menu, Paper } from '@mui/material
 import React from 'react';
 import { retrieveFile } from '../../services/web3storage';
 
-export const MenuComponent = (props : {menuEv:any, setMenuEv:any, files:any[]}) => {
+export const MenuComponent = (props: any) => {
 
-  const handleCloseOptions = () => {
-    props.setMenuEv(null);
-  };
+  const handleCloseOptions = () => props.setMenuEv(null);
 
-	const downloadFile = (e: any) => {
+	const getRowMetadata = () => {
 		const partial_cid = props.menuEv.target.parentElement.children[props.menuEv.target.parentElement.children.length-1].innerText.substring(1);
 		// Folder case (need to zip)
 		if(partial_cid === "-") return;
+		return props.files.filter((file:any) => file.cid.slice(0, 6) === partial_cid.slice(0, 6) && file.cid.slice(-6) === partial_cid.slice(-6));
+	}
 
-		const metadata = props.files.filter((file:any) => file.cid.slice(0, 6) === partial_cid.slice(0, 6) && file.cid.slice(-6) === partial_cid.slice(-6));
-
+	const downloadFile = (e: any) => {
+		const metadata = getRowMetadata();
 		retrieveFile(metadata[0].cid).then((data:any) => {
 			const blob = new Blob([data], { type: 'application/octet-stream' });
 			const url = window.URL.createObjectURL(blob);
@@ -57,7 +57,8 @@ export const MenuComponent = (props : {menuEv:any, setMenuEv:any, files:any[]}) 
 				</ListItemIcon>
 				<ListItemText>Rename</ListItemText>
 			</MenuItem>
-			<MenuItem>
+			<MenuItem onClick={() => {
+				props.setCid(getRowMetadata()[0].cid); handleCloseOptions(); props.handleOpenMove(); }}>
 				<ListItemIcon>
 					<DriveFileMoveOutlined fontSize="small" />
 				</ListItemIcon>

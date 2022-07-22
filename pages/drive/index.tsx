@@ -57,7 +57,7 @@ const Drive: NextPage = (props: any) => {
 			setAddress(addr);
 			dbGetFiles(addr).then((data) => setFiles(data));
 		});
-	}, [files.length]);
+	}, []);
 
 	return (
 		<>

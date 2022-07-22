@@ -1,7 +1,7 @@
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material'
+import { Alert, Box, Button, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField, Typography } from '@mui/material'
 import Link from 'next/link'
-import React, { useEffect } from 'react';
-import { File } from '../../services/tableland';
+import React, { useEffect, useRef } from 'react';
+import { dbUpdatePath, File } from '../../services/tableland';
 import Moment from 'moment';
 
 import FolderIcon from '@mui/icons-material/Folder';
@@ -48,6 +48,32 @@ export const Drive = (props: {files: File[]}) => {
   const [menuEv, setMenuEv] = React.useState<any|null>(null);
   const [selectedIndex, setSelectedIndex] = React.useState(1);
 	const [address, setAddress] = React.useState('');
+	const [cid, setCid] = React.useState('');
+
+  const [openMove, setOpenMove] = React.useState(false);
+  const handleOpenMove = () => setOpenMove(true);
+  const handleCloseMove = () => setOpenMove(false);
+	const movePathEl = useRef<HTMLInputElement>(null);
+	const handleMove = async () => {
+		let path = movePathEl.current?.value;
+		if(cid && path) {
+			if (Array.from('path')[0] !== '/') {
+				path = '/' + path;
+			}
+			if (Array.from('path')[Array.from('path').length - 1] !== '/') {
+				path = path + '/';
+			}
+
+			dbUpdatePath(cid, path).then((result) => {
+				console.log(cid, path);
+				console.log("result", result);
+				handleCloseMove();
+				refreshData();
+			});
+		}
+		//const cid = await storeFiles(e.target.files[0]);
+		//await dbAddFile(cid, e.target.files[0].name, '/', address, e.target.files[0].size);
+	};
 
 	const columns: readonly Column[] = [
 		{ id: 'name', label: 'Name', minWidth: 170, align: 'left' },
@@ -73,61 +99,65 @@ export const Drive = (props: {files: File[]}) => {
 			format: (value: string) => value === '-' ? '-': value.substring(0, 7) + ' ... ' + value.substring(value.length - 7, value.length)
 		},
 	];
+	
 	let data: Data[] = [];
-
-	useEffect(() => {
-		getUserAddress().then(addr => setAddress(addr));
-	});
-
-	props.files?.forEach((file: File, index: number) => {
-		if (file.name.charAt(file.name.length - 1) === '/') {
-			data.push(createData(
-				'folder',
-				file.name.substring(0, file.name.length - 1),
-				file.modifiedDate + ' ' + file.owner,
-				'-',
-				'-',
-				[]
-			));
-		} else if (file.path !== '/') {
-			// filter
-			if (data.filter(d => d.name === file.path.split('/')[1]).length === 0) {
+	const refreshData = async () => {
+		props.files?.forEach((file: File) => {
+			if (file.name.charAt(file.name.length - 1) === '/') {
 				data.push(createData(
-					"folder",
-					file.path.split('/')[1], // change for parent folder instead of root (come as an url param)
+					'folder',
+					file.name.substring(0, file.name.length - 1),
 					file.modifiedDate + ' ' + file.owner,
 					'-',
 					'-',
-					[file.cid],
+					[]
 				));
-			}	else {
-				let folder = data.filter(d => d.name === file.path.split('/')[1])[0]
-				folder.files.push(file.cid);
-				if (folder.modified_date < file.modifiedDate) {
-					folder.modified_date = file.modifiedDate + ' ' + file.owner;
+			} else if (file.path !== '/') {
+				// filter
+				if (data.filter(d => d.name === file.path.split('/')[1]).length === 0) {
+					data.push(createData(
+						"folder",
+						file.path.split('/')[1], // change for parent folder instead of root (come as an url param)
+						file.modifiedDate + ' ' + file.owner,
+						'-',
+						'-',
+						[file.cid],
+					));
+				}	else {
+					let folder = data.filter(d => d.name === file.path.split('/')[1])[0]
+					folder.files.push(file.cid);
+					if (folder.modified_date < file.modifiedDate) {
+						folder.modified_date = file.modifiedDate + ' ' + file.owner;
+					}
 				}
+			} else {
+				data.push(createData(
+					"file",
+					file.name,
+					file.modifiedDate + ' ' + file.owner,
+					file.size,
+					file.cid,
+					[]
+				));
 			}
-		} else {
-			data.push(createData(
-				"file",
-				file.name,
-				file.modifiedDate + ' ' + file.owner,
-				file.size,
-				file.cid,
-				[]
-			));
-		}
-	});
+		});
 
-	data.sort((a, b) => {
-		if (a.type === 'folder' && b.type === 'file') {
-			return -1;
-		}
-		if (a.type === 'file' && b.type === 'folder') {
-			return 1;
-		}
-		return a.name.localeCompare(b.name);
-	});
+		data.sort((a, b) => {
+			if (a.type === 'folder' && b.type === 'file') {
+				return -1;
+			}
+			if (a.type === 'file' && b.type === 'folder') {
+				return 1;
+			}
+			return a.name.localeCompare(b.name);
+		});
+	}
+	
+	refreshData();
+
+	useEffect(() => {
+		getUserAddress().then(addr => setAddress(addr));
+	}, []);
 
   const handleListItemClick = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -214,6 +244,8 @@ export const Drive = (props: {files: File[]}) => {
 											<MenuComponent
 												menuEv={menuEv}
 												setMenuEv={setMenuEv}
+												handleOpenMove={handleOpenMove}
+												setCid={setCid}
 												files={data}
 											/>
 										</>
@@ -232,6 +264,39 @@ export const Drive = (props: {files: File[]}) => {
 					onRowsPerPageChange={handleChangeRowsPerPage}
 				/>
 			</Paper>
+      <Modal
+        open={openMove}
+        onClose={handleCloseMove}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{
+					position: 'absolute' as 'absolute',
+					top: '50%',
+					left: '50%',
+					transform: 'translate(-50%, -50%)',
+					width: 400,
+					bgcolor: 'background.paper',
+					boxShadow: 4,
+					borderRadius: '10px',
+					p: 4,
+				}}>
+          <Typography variant="h6" component="h2" sx={{ marginTop: 1 }}>
+						Path
+          </Typography>
+
+					<TextField inputRef={movePathEl} variant="outlined" sx={{ marginTop:1, width: "100%" }} placeholder="/" />
+
+					<Box sx={{ marginTop: 1, display: 'flex', justifyContent: 'flex-end' }}>
+						<Button color="primary" onClick={handleCloseMove} sx={{ marginRight: 1, color: '#757575' }}>
+							Cancel
+						</Button>
+						<Button color="primary" onClick={handleMove}>
+							Move
+						</Button>
+					</Box>
+        </Box>
+      </Modal>
 		</>
   );
 }
