@@ -25,3 +25,10 @@ export const ratioBetweenComputingUnits = (v1: string, v2: string): number => {
 
 	return parseInt(value1, 10) * 100 / parseInt(value2, 10);
 }
+
+export const convertToUSD = async (token:string, value: number) => {
+	const response = await fetch('https://api.covalenthq.com/v1/pricing/tickers/?quote-currency=USD&format=JSON&tickers=' + token + '&key=ckey_be6ce18e2e8743df94fe7c614eb');
+	const json = await response.json();
+	let res = json.data.items[0].quote_rate;
+	return res * value;
+}

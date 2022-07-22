@@ -16,6 +16,7 @@ import { checkIfUserIsConnected, connectWallet, getUserAddress, getUserBalance, 
 import { Button, ButtonGroup } from '@mui/material'
 import { Router } from '@mui/icons-material';
 import { useRouter } from 'next/router';
+import { convertToUSD } from '../../utils/functions';
 
 const options = ['Settings'];
 
@@ -67,6 +68,7 @@ export const Header = () => {
 	const [isUserConnected, setIsUserConnected] = React.useState(false);
 	const [userAddress, setUserAddress] = React.useState("");
 	const [userBalance, setUserBalance] = React.useState("");
+	const [userBalanceUSD, setUserBalanceUSD] = React.useState(0);
 
 	React.useEffect(() => {
 		handleWallet();
@@ -78,7 +80,9 @@ export const Header = () => {
 			setUserAddress(await getUserAddress());
 
 			const balance = await getUserBalance();
+			const balanceUSD = await convertToUSD('matic', Number(userBalance));
 			setUserBalance(String(Math.round(Number(balance) * 10000) / 10000));
+			setUserBalanceUSD(Math.round(balanceUSD * 100) / 100);
 		} else {
 			// add message to change chain
 		}
@@ -150,7 +154,7 @@ export const Header = () => {
 							<Button
 								disabled
 								sx={{":disabled": { color: '#dedede', borderColor: '#757575', textTransform: 'none' }}}>
-								{userBalance} MATIC &nbsp;
+								{userBalance} MATIC (${userBalanceUSD}) &nbsp;
 								<img src="/images/polygon-logo.svg" width="25" height="25" />
 							</Button>
 							<Button 
