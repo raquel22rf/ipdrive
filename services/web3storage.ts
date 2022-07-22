@@ -15,3 +15,9 @@ export const retrieveFile = async (cid : string) => {
 
 	return files[0];
 }
+
+export const deleteFile = async (cid : string) => {
+	// delete file not working, use ipfs instead
+	await storage.delete(cid);
+	console.log('Content deleted with CID:', cid);
+}

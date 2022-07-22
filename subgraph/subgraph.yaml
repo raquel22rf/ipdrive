@@ -1,0 +1,26 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: IPDrive
+    network: mumbai
+    source:
+      address: "0x10b7833e9fEde90C4EaE687fCB4343336Ea5168B"
+      abi: IPDrive
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - MonthlyPaymentMade
+        - SubscriptionMade
+      abis:
+        - name: IPDrive
+          file: ./abis/IPDrive.json
+      eventHandlers:
+        - event: MonthlyPaymentMade(address)
+          handler: handleMonthlyPaymentMade
+        - event: SubscriptionMade(address)
+          handler: handleSubscriptionMade
+      file: ./src/ip-drive.ts
