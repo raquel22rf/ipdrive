@@ -64,9 +64,7 @@ export const Drive = (props: {files: File[]}) => {
 				path = path + '/';
 			}
 
-			dbUpdatePath(cid, path).then((result) => {
-				console.log(cid, path);
-				console.log("result", result);
+			dbUpdatePath(cid, path).then(async () => {
 				handleCloseMove();
 				refreshData();
 			});

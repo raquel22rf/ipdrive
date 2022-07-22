@@ -164,21 +164,15 @@ export const dbUpdateFile = async () => {
 
 export const dbUpdatePath = async (cid: string, path: string) => {
 	const tableland = await dbConnect();
+	const updateRes = await tableland.write(`UPDATE ipdrive_files_80001_49 SET path = '` + path + `'
+		WHERE cid = '` + cid + `';`);
 
-	const readRes = await tableland.read(`SELECT * FROM ipdrive_files_80001_49
-		WHERE cid = '` + cid + `';`);
-	console.log(cid, readRes);
-	const updateRes = await tableland.write(`UPDATE mytable_80001_39 SET path = '` + path + `'
-		WHERE cid = '` + cid + `';`);
-	
-	console.log(`Updated file path: ${updateRes.hash}`);
 	return updateRes;
 }
 
 export const dbDeleteFile = async (cid: string) => {
 	const tableland = await dbConnect();
-	//const removeRes = await tableland.write(`DELETE FROM mytable_80001_39 WHERE id = 0;`);
-	const removeRes = await tableland.write(`UPDATE mytable_80001_39 SET status = 'deleted'
+	const removeRes = await tableland.write(`UPDATE ipdrive_files_80001_49 SET status = 'deleted'
 		WHERE cid = '` + cid + `';`);
 
 	return removeRes;
