@@ -5,7 +5,7 @@ import React, { useEffect, useRef } from 'react';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Drive as DriveComponent } from '../../components/Drive/Drive';
-import { dbAddFile, dbGetFiles, dbGetSizeSum, File } from '../../services/tableland';
+import { dbAddFile, dbCreateFilesTable, dbGetFiles, dbGetSizeSum, File } from '../../services/tableland';
 import { getUserAddress } from '../../services/wallet';
 import { storeFiles } from '../../services/web3storage';
 import { convertToComputingUnits } from '../../utils/functions';
