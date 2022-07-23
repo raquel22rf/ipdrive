@@ -17,25 +17,36 @@ import GamepadIcon from '@mui/icons-material/Gamepad';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
-import { Button, LinearProgress } from '@mui/material';
+import { Button, LinearProgress, Modal } from '@mui/material';
 import { convertToComputingUnits, ratioBetweenComputingUnits } from '../../utils/functions';
 import { dbGetSizeSum } from '../../services/tableland';
+import { convertToUSD } from '../../utils/functions';
 
 export const Sidebar = (props: any) => {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  	const [mobileOpen, setMobileOpen] = React.useState(false);
 	const [container, setContainer] = React.useState<any>(undefined);
+	const [monthlyUSD, setMonthlyUSD] = React.useState(0);
+  	const handleOpen = () => setOpen(true);
+  	const handleClose = () => setOpen(false);
+	  const [open, setOpen] = React.useState(false);
 	const drawerWidth = 240;
-
+	
 	React.useEffect(() => {
 		setContainer(() => window.document.body);
 		dbGetSizeSum().then((data: string) => props.setSize(convertToComputingUnits(data)));
+		handleConversion();
 	}, [])
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+	const handleConversion = async () => {
+		const value = await convertToUSD('matic', 5);
+		setMonthlyUSD(Math.round(value * 100) / 100);
+	}
 
-  const drawer = (
+	const handleDrawerToggle = () => {
+		setMobileOpen(!mobileOpen);
+	};
+
+   const drawer = (
     <>
 			<Toolbar>
 				<GamepadIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
@@ -107,9 +118,40 @@ export const Sidebar = (props: any) => {
 				<LinearProgress
 					variant="determinate"
 					value={ratioBetweenComputingUnits(props.size, "20 GB")} />
-				<Button variant="outlined" sx={{ width: '100%', marginTop: 1 }}>
+				<Button variant="outlined" onClick={handleOpen} sx={{ width: '100%', marginTop: 1 }}>
 					Upgrade Now
 				</Button>
+
+        <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{
+					position: 'absolute' as 'absolute',
+					top: '50%',
+					left: '50%',
+					transform: 'translate(-50%, -50%)',
+					width: 500,
+					bgcolor: 'background.paper',
+					boxShadow: 4,
+					borderRadius: '10px',
+					p: 4,
+				}}>
+          <Typography variant="h6" component="h2" sx={{ marginTop: 1 }}>
+				Upgrade your Storage to 1TB with 5 MATIC ($ {monthlyUSD}) per month!
+          </Typography>
+					<Box sx={{ marginTop: 1, display: 'flex', justifyContent: 'flex-end' }}>
+						<Button color="primary" onClick={handleClose} sx={{ marginRight: 1, color: '#757575' }}>
+							Cancel
+						</Button>
+						<Button color="primary" >
+							Upgrade
+						</Button>
+					</Box>
+        </Box>
+      </Modal>
 			</Box>
     </>
   );
