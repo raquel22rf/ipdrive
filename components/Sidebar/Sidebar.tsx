@@ -25,18 +25,17 @@ import IPDrive from '../../artifacts/contracts/IPDrive.sol/IPDrive.json';
 import { ethers } from "ethers";
 
 export const Sidebar = (props: any) => {
-  	const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
 	const [container, setContainer] = React.useState<any>(undefined);
 	const [monthlyUSD, setMonthlyUSD] = React.useState(0);
 	const [account, setAccount] = React.useState("");
-  	const handleOpen = () => setOpen(true);
-  	const handleClose = () => setOpen(false);
+	const [spaceAvailable, setSpaceAvailable] = React.useState("20 GB");
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 	const [open, setOpen] = React.useState(false);
 	const drawerWidth = 240;
 
 	const contractAddress = "0x10b7833e9fEde90C4EaE687fCB4343336Ea5168B";
-
-	
 	
 	
 	React.useEffect(() => {
@@ -71,10 +70,10 @@ export const Sidebar = (props: any) => {
 			value: ethers.utils.parseEther("0.001"),
 		};	
 		const sub = await contract.subscribe(overrides);
-		console.log(sub);
-		const event = await contract.on("SubscriptionMade", () => {});
-		console.log(event);
-		handleClose();
+		const event = await contract.on("SubscriptionMade", () => {
+			setSpaceAvailable("1 TB");
+			handleClose();
+		});
 		}
 
    const drawer = (
@@ -145,11 +144,11 @@ export const Sidebar = (props: any) => {
       </List>
 
 			<Box sx={{ margin: '0 20px', width: '80%', position: 'absolute', bottom: '20px' }}>
-				<Typography variant='caption'>{props.size} of 20 GB used</Typography>
+				<Typography variant='caption'>{props.size} of {spaceAvailable} used</Typography>
 				<LinearProgress
 					variant="determinate"
-					value={ratioBetweenComputingUnits(props.size, "20 GB")} />
-				<Button variant="outlined" onClick={handleOpen} sx={{ width: '100%', marginTop: 1 }}>
+					value={ratioBetweenComputingUnits(props.size, spaceAvailable)} />
+				<Button variant="outlined" onClick={handleOpen} disabled={spaceAvailable === "1 TB"} sx={{ width: '100%', marginTop: 1 }}>
 					Upgrade Now
 				</Button>
 
