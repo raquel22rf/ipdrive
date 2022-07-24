@@ -21,15 +21,23 @@ import { Button, LinearProgress, Modal } from '@mui/material';
 import { convertToComputingUnits, ratioBetweenComputingUnits } from '../../utils/functions';
 import { dbGetSizeSum } from '../../services/tableland';
 import { convertToUSD } from '../../utils/functions';
+import IPDrive from '../../artifacts/contracts/IPDrive.sol/IPDrive.json';
+import { ethers } from "ethers";
 
 export const Sidebar = (props: any) => {
   	const [mobileOpen, setMobileOpen] = React.useState(false);
 	const [container, setContainer] = React.useState<any>(undefined);
 	const [monthlyUSD, setMonthlyUSD] = React.useState(0);
+	const [account, setAccount] = React.useState("");
   	const handleOpen = () => setOpen(true);
   	const handleClose = () => setOpen(false);
-	  const [open, setOpen] = React.useState(false);
+	const [open, setOpen] = React.useState(false);
 	const drawerWidth = 240;
+
+	const contractAddress = "0x10b7833e9fEde90C4EaE687fCB4343336Ea5168B";
+
+	
+	
 	
 	React.useEffect(() => {
 		setContainer(() => window.document.body);
@@ -45,6 +53,29 @@ export const Sidebar = (props: any) => {
 	const handleDrawerToggle = () => {
 		setMobileOpen(!mobileOpen);
 	};
+
+	const handleSubscription = async () => {
+		const currentAccount = await window.ethereum.request({
+			method: "eth_accounts",
+		});
+		setAccount(currentAccount);
+
+		const provider = new ethers.providers.Web3Provider(window.ethereum);
+		const signer = provider.getSigner();
+		const contract = new ethers.Contract(
+			contractAddress,
+			IPDrive.abi,
+			signer
+		);
+		const overrides = {
+			value: ethers.utils.parseEther("0.001"),
+		};	
+		const sub = await contract.subscribe(overrides);
+		console.log(sub);
+		const event = await contract.on("SubscriptionMade", () => {});
+		console.log(event);
+		handleClose();
+		}
 
    const drawer = (
     <>
@@ -146,7 +177,7 @@ export const Sidebar = (props: any) => {
 						<Button color="primary" onClick={handleClose} sx={{ marginRight: 1, color: '#757575' }}>
 							Cancel
 						</Button>
-						<Button color="primary" >
+						<Button color="primary" onClick={handleSubscription}>
 							Upgrade
 						</Button>
 					</Box>
