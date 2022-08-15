@@ -9,13 +9,14 @@ import { dbAddFile, dbCreateFilesTable, dbGetFiles, dbGetSizeSum, File } from '.
 import { getUserAddress } from '../../services/wallet';
 import { storeFiles } from '../../services/web3storage';
 import { convertToComputingUnits } from '../../utils/functions';
+import lit from "../../services/lit";
 
 const Drive: NextPage = (props: any) => {
 	const [files, setFiles] = React.useState<File[]>([]);
-  const [open, setOpen] = React.useState(false);
+  	const [open, setOpen] = React.useState(false);
 	const [address, setAddress] = React.useState('');
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  	const handleOpen = () => setOpen(true);
+  	const handleClose = () => setOpen(false);
 	const folderEl = useRef<HTMLInputElement>(null);
 
 	const handleCreateFolder = () => {
@@ -35,7 +36,11 @@ const Drive: NextPage = (props: any) => {
 		setOpen(false);
 	}
 
+	// to delete
+	const delay = (ms:any) => new Promise(res => setTimeout(res, ms));
+
 	const handleFileUpload = async (e: any) => {
+		const { encryptedFile, encryptedSymmetricKey } = await lit.encrypt(e.target.files[0]);		
 		const cid = await storeFiles(e.target.files[0]);
 		await dbAddFile(cid, e.target.files[0].name, '/', address, e.target.files[0].size);
 		setFiles([...files, {
@@ -50,6 +55,20 @@ const Drive: NextPage = (props: any) => {
 			status: 'pending',
 		}]);
 		dbGetSizeSum().then((data: string) => props.setSize(convertToComputingUnits((Number(data) + e.target.files[0].size).toString())));
+
+		// to delete
+		await delay(5000);
+		console.log("Waited 5s");
+
+		await delay(5000);
+		console.log("Waited an additional 5s");
+
+		console.log('DECRYPTION')
+		const { decryptedFile } = await lit.decrypt(encryptedFile, encryptedSymmetricKey)
+		console.log('file descripted', decryptedFile)
+
+		// until here
+
 	}
 
 	useEffect(() => {
@@ -74,7 +93,7 @@ const Drive: NextPage = (props: any) => {
 					hidden
 				/>
 			</Button>
-
+			
 			<DriveComponent files={files} />
       <Modal
         open={open}
