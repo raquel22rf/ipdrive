@@ -13,14 +13,14 @@ import lit from "../../services/lit";
 
 const Drive: NextPage = (props: any) => {
 	const [files, setFiles] = React.useState<File[]>([]);
-  	const [open, setOpen] = React.useState(false);
+	const [open, setOpen] = React.useState(false);
 	const [address, setAddress] = React.useState('');
-  	const handleOpen = () => setOpen(true);
-  	const handleClose = () => setOpen(false);
+	const handleOpen = () => setOpen(true);
+	const handleClose = () => setOpen(false);
 	const folderEl = useRef<HTMLInputElement>(null);
 
 	const handleCreateFolder = () => {
-		if(folderEl.current && folderEl.current.value) {
+		if (folderEl.current && folderEl.current.value) {
 			setFiles([...files, {
 				cid: '-',
 				name: folderEl.current.value + '/',
@@ -37,11 +37,12 @@ const Drive: NextPage = (props: any) => {
 	}
 
 	// to delete
-	const delay = (ms:any) => new Promise(res => setTimeout(res, ms));
+	const delay = (ms: any) => new Promise(res => setTimeout(res, ms));
 
 	const handleFileUpload = async (e: any) => {
-		const { encryptedFile, encryptedSymmetricKey } = await lit.encrypt(e.target.files[0]);		
-		const cid = await storeFiles(e.target.files[0]);
+		console.log('[DEBUG]', e.target.files);
+		const { encryptedFile, encryptedSymmetricKey } = await lit.encrypt(e.target.files[0]);
+		const cid = await storeFiles(encryptedFile);
 		await dbAddFile(cid, e.target.files[0].name, '/', address, e.target.files[0].size);
 		setFiles([...files, {
 			cid,
@@ -60,14 +61,19 @@ const Drive: NextPage = (props: any) => {
 		await delay(5000);
 		console.log("Waited 5s");
 
-		await delay(5000);
-		console.log("Waited an additional 5s");
-
-		console.log('DECRYPTION')
 		const { decryptedFile } = await lit.decrypt(encryptedFile, encryptedSymmetricKey)
 		console.log('file descripted', decryptedFile)
 
+		let blob = new Blob([decryptedFile], { type: e.target.files[0].type });
+		console.log(blob)
 		// until here
+		const url = window.URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.setAttribute('download', 'hello');
+		link.click();
+		props.setMenuEv(null);
+
 
 	}
 
@@ -80,11 +86,11 @@ const Drive: NextPage = (props: any) => {
 
 	return (
 		<>
-			<Button variant="outlined" startIcon={ <CreateNewFolderIcon /> } onClick={handleOpen} sx={{ margin: '0 5px 0 0', color: '#dedede', borderColor: '#757575' }}>New Folder</Button>
+			<Button variant="outlined" startIcon={<CreateNewFolderIcon />} onClick={handleOpen} sx={{ margin: '0 5px 0 0', color: '#dedede', borderColor: '#757575' }}>New Folder</Button>
 			<Button
 				variant="outlined"
 				component="label"
-				startIcon={ <UploadFileIcon /> }
+				startIcon={<UploadFileIcon />}
 				sx={{ color: '#dedede', borderColor: '#757575' }}>
 				Upload File
 				<input
@@ -93,15 +99,15 @@ const Drive: NextPage = (props: any) => {
 					hidden
 				/>
 			</Button>
-			
+
 			<DriveComponent files={files} />
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={{
+			<Modal
+				open={open}
+				onClose={handleClose}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box sx={{
 					position: 'absolute' as 'absolute',
 					top: '50%',
 					left: '50%',
@@ -114,11 +120,11 @@ const Drive: NextPage = (props: any) => {
 				}}>
 					<Alert severity="warning">Folders will only persist after files are uploaded inside them!</Alert>
 
-          <Typography variant="h6" component="h2" sx={{ marginTop: 1 }}>
+					<Typography variant="h6" component="h2" sx={{ marginTop: 1 }}>
 						New Folder
-          </Typography>
+					</Typography>
 
-					<TextField inputRef={folderEl} variant="outlined" sx={{ marginTop:1, width: "100%" }} />
+					<TextField inputRef={folderEl} variant="outlined" sx={{ marginTop: 1, width: "100%" }} />
 
 					<Box sx={{ marginTop: 1, display: 'flex', justifyContent: 'flex-end' }}>
 						<Button color="primary" onClick={handleClose} sx={{ marginRight: 1, color: '#757575' }}>
@@ -128,8 +134,8 @@ const Drive: NextPage = (props: any) => {
 							Create
 						</Button>
 					</Box>
-        </Box>
-      </Modal>
+				</Box>
+			</Modal>
 		</>
 	)
 }

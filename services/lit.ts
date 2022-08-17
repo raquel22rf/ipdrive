@@ -1,36 +1,36 @@
 import LitJsSdk from 'lit-js-sdk'
 
 const client = new LitJsSdk.LitNodeClient()
-const chain = 'ethereum'
+const chain = 'polygon'
 const standardContractType = 'ERC721'
 
 class Lit {
   private litNodeClient: any
-  
+
   async connect() {
     await client.connect()
     this.litNodeClient = client
   }
 
-  async encrypt(file: File | Blob){
+  async encrypt(file: File | Blob) {
     if (!this.litNodeClient) {
       await this.connect()
     }
-  
+
     const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
 
-    const { encryptedFile, symmetricKey } = await LitJsSdk.encryptFile({file: file})
+    const { encryptedFile, symmetricKey } = await LitJsSdk.encryptFile({ file: file })
     const accessControlConditions = [
       {
         contractAddress: '',
-        standardContractType,
-        chain,
-        method: "balanceOf",
-        parameters: [":userAddress", 'latest'],
+        standardContractType: '',
+        method: 'eth_getBalance',
+        parameters: [':userAddress', 'latest'],
         returnValueTest: {
-          comparator: ">=",
-          value: "1",
+          comparator: '>=',
+          value: '0',  // 0.000001 ETH
         },
+        chain: 'polygon',
       },
     ];
 
@@ -40,7 +40,8 @@ class Lit {
       authSig,
       chain,
     })
-  
+    console.log('[DEBUG ENCRYPT]', encryptedSymmetricKey)
+
     return {
       encryptedFile,
       encryptedSymmetricKey: LitJsSdk.uint8arrayToString(encryptedSymmetricKey, "base16")
@@ -53,18 +54,19 @@ class Lit {
     }
     const accessControlConditions = [
       {
+        chain: 'polygon',
         contractAddress: '',
-        standardContractType,
-        chain,
-        method: "balanceOf",
-        parameters: [":userAddress", 'latest'],
+        standardContractType: '',
+        method: 'eth_getBalance',
+        parameters: [':userAddress', 'latest'],
         returnValueTest: {
-          comparator: ">=",
-          value: "1",
+          comparator: '>=',
+          value: '0',  // 0.000001 ETH
         },
       },
     ];
     const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
+    console.log('[DEBUG DECRYPT]', encryptedSymmetricKey, authSig)
 
     const symmetricKey = await this.litNodeClient.getEncryptionKey({
       accessControlConditions,
@@ -72,11 +74,11 @@ class Lit {
       chain,
       authSig
     })
-    
+
     console.log('parametros', encryptedFile, symmetricKey)
     const decryptedFile = await LitJsSdk.decryptFile({
       symmetricKey: symmetricKey,
-      file: encryptedFile, 
+      file: encryptedFile,
     });
 
     console.log('resposta', decryptedFile)
@@ -84,6 +86,6 @@ class Lit {
     return { decryptedFile }
   }
 }
-  
-export default new Lit()  
+
+export default new Lit()
 
