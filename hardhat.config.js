@@ -1,5 +1,8 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
+require("dotenv").config();
+
+const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY;
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -28,7 +31,7 @@ module.exports = {
     },
 		mumbai: {
 			url: "https://rpc-mumbai.maticvigil.com/v1/cbf49a46f64f11243f0d05507ecb0be9484fdcb6",
-      accounts: [``]
+      accounts: [`0x${WALLET_PRIVATE_KEY}`]
 		}
   },
   solidity: {
