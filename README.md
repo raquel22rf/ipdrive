@@ -16,5 +16,5 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Contributors
 
-**Protocol Labs (ETHGlobal HackFS 2022) -** 420.88 FIL  
+**Protocol Labs (ETHGlobal HackFS 2022 + Microgrant) -** 1248.69 FIL  
 **Textile (ETHGlobal HackFS 2022) -** 133 USDC
