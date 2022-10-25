@@ -1,6 +1,6 @@
-# InterPlanetary Drive 
+# ZDrive 
 
-IPDrive is a file storage service for users to store and share files in the decentralized internet. This service comes as a replacement for centralized services such as Dropbox, Google Drive and One Drive.
+ZDrive is a file storage service for users to store and share files in the decentralized internet. This service comes as a replacement for centralized services such as Dropbox, Google Drive and One Drive.
 
 **NOTE: We are currently looking for people to contribute to this project. Feel free to to create a pull request!**
 
